@@ -23,6 +23,7 @@ const templates = [
 export default function PreviewPage() {
     const [activeTemplateId, setActiveTemplateId] = useState(1);
     const [resumeData, setResumeData] = useState<any>(null);
+    const [activeView, setActiveView] = useState<'resume' | 'coverLetter'>('resume');
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const resumeRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
@@ -61,7 +62,8 @@ export default function PreviewPage() {
                         duration: "2015 - 2019"
                     }
                 ],
-                skills: ["React", "TypeScript", "Node.js", "Python", "AWS"]
+                skills: ["React", "TypeScript", "Node.js", "Python", "AWS"],
+                coverLetter: "Dear Hiring Manager,\n\nI am writing to express my interest in the Senior Frontend Engineer position at Tech Solutions Inc. With over 5 years of experience building scalable web applications and leading frontend teams, I am confident in my ability to contribute to your engineering team.\n\nThroughout my career, I have consistently delivered high-performance applications. At my previous role, I led the migration to Next.js, resulting in a 40% improvement in load times and a significant boost in user engagement. I am passionate about modern frontend technologies and mentoring junior team members.\n\nThank you for considering my application. I look forward to discussing how my skills and experiences align with your team's goals.\n\nSincerely,\nJane Doe"
             });
         }
     }, []);
@@ -103,6 +105,26 @@ export default function PreviewPage() {
                     <ArrowLeft size={16} /> Back to Editor
                 </Link>
 
+                {resumeData?.coverLetter && (
+                    <div className="view-toggle mb-6">
+                        <h3 className="control-section-title">Document View</h3>
+                        <div className="flex gap-2">
+                            <button
+                                className={`flex-1 py-2 text-sm rounded font-medium transition-colors ${activeView === 'resume' ? 'bg-accent text-white' : 'bg-white/10 text-secondary hover:bg-white/20'}`}
+                                onClick={() => setActiveView('resume')}
+                            >
+                                Resume
+                            </button>
+                            <button
+                                className={`flex-1 py-2 text-sm rounded font-medium transition-colors ${activeView === 'coverLetter' ? 'bg-accent text-white' : 'bg-white/10 text-secondary hover:bg-white/20'}`}
+                                onClick={() => setActiveView('coverLetter')}
+                            >
+                                Cover Letter
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <h3 className="control-section-title"><LayoutTemplate size={18} className="text-accent" /> Choose Template</h3>
 
                 <div className="template-selector">
@@ -129,7 +151,25 @@ export default function PreviewPage() {
             {/* Resume Preview Box */}
             <main className="preview-canvas-container">
                 <div className="preview-canvas" ref={resumeRef}>
-                    <ActiveTemplate data={resumeData} />
+                    {activeView === 'resume' ? (
+                        <ActiveTemplate data={resumeData} />
+                    ) : (
+                        <div className="cover-letter-preview p-12 bg-white text-black min-h-[1056px] w-full max-w-[816px] shadow-sm mx-auto font-serif">
+                            <div className="mb-12">
+                                <h1 className="text-3xl font-bold text-gray-900 border-b-2 border-gray-800 pb-4 mb-4">
+                                    {resumeData.personalInfo.fullName}
+                                </h1>
+                                <div className="text-sm text-gray-600 flex flex-col gap-1">
+                                    {resumeData.personalInfo.email && <span>{resumeData.personalInfo.email}</span>}
+                                    {resumeData.personalInfo.phone && <span>{resumeData.personalInfo.phone}</span>}
+                                    {resumeData.personalInfo.location && <span>{resumeData.personalInfo.location}</span>}
+                                </div>
+                            </div>
+                            <div className="whitespace-pre-wrap text-gray-800 leading-relaxed text-[15px]">
+                                {resumeData.coverLetter}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
         </div>

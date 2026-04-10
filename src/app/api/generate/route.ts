@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { NextResponse } from 'next/server';
 
 const ResumeSchema = z.object({
-    summary: z.string().describe('Professional summary tailored to the job description'),
+    summary: z.string().describe('Professional summary tailored to the job description. Retain user selected summary if provided.'),
     experience: z.array(z.object({
         company: z.string(),
         position: z.string(),
@@ -21,7 +21,14 @@ const ResumeSchema = z.object({
         name: z.string(),
         description: z.array(z.string()).describe('List of bullet points describing the project and your role'),
         technologies: z.array(z.string()).describe('List of technologies used in the project')
-    })).optional()
+    })).optional(),
+    certifications: z.array(z.object({
+        name: z.string(),
+        issuer: z.string(),
+        year: z.string()
+    })).optional(),
+    languages: z.array(z.string()).optional(),
+    coverLetter: z.string().describe('A professional cover letter addressed to the hiring manager, matching the job description and user profile, if requested or context provided.').optional()
 });
 
 export async function POST(req: Request) {
@@ -31,27 +38,39 @@ export async function POST(req: Request) {
 
         const prompt = `
       You are an expert resume writer. Act as a professional resume builder API.
-      Given the user's raw experience, education, skills, and a target job description,
-      generate a highly professional resume tailored to the job description.
+      Given the user's structured experience, education, skills, summary, cover letter context and a target job description,
+      generate a highly professional resume and optionally a cover letter tailored to the job description.
 
       Target Job Description:
       ${formData.jobDescription || "Not provided (optimize for general roles based on experience)"}
+      
+      User Selected Summary:
+      ${formData.summary || "Not provided (generate a new one)"}
 
       User Raw Experience:
-      ${formData.experience}
+      ${typeof formData.experience === 'string' ? formData.experience : JSON.stringify(formData.experience, null, 2)}
 
       User Raw Education:
-      ${formData.education}
+      ${typeof formData.education === 'string' ? formData.education : JSON.stringify(formData.education, null, 2)}
 
       User Raw Skills:
       ${formData.skills}
       
       User Raw Projects:
-      ${formData.projects || "Not provided"}
+      ${typeof formData.projects === 'string' ? formData.projects : JSON.stringify(formData.projects, null, 2)}
+      
+      User Certifications:
+      ${typeof formData.certifications === 'string' ? formData.certifications : JSON.stringify(formData.certifications, null, 2)}
+      
+      User Languages:
+      ${formData.languages || "Not provided"}
+
+      User Cover Letter Request/Context:
+      ${formData.coverLetter || "Not provided (generate a general cover letter if applicable, or leave empty)"}
       
       Extract all relevant details and rewrite them into a compelling professional summary, 
       action-oriented experience bullets, structured education, a refined list of skills, 
-      and a well-structured projects section. 
+      projects, certifications, languages, and an optional cover letter. 
       Ensure the output exactly matches the JSON schema requested.
     `;
 
