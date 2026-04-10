@@ -1,0 +1,9 @@
+College: vishwakarma gov eng college 
+Cource type :BE
+Cource duration:4 years 
+Cource name :information and communication technology
+Graduation year:-2027
+
+Ai powered resume maker , agricultural management system prepare 4 bullet points for each
+
+Skills;-C,C++,JS,Python,MERN,DBMS,OS,DSA,Git,Github
